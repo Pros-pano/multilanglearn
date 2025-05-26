@@ -1,4 +1,4 @@
-// C++ Day 1: Print, Variables, and Data Types
+// C++ Day 1: Print, Variables, and Data Types - added by Vaidehi
 
 #include <iostream>     // Required for input/output operations
 #include <string>       // Required for string operations

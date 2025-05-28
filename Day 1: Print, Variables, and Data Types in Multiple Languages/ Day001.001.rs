@@ -671,14 +671,12 @@ in Rust";
     // Chaining results with and_then
     let chained = result.and_then(|x| Ok(x + 1));
     println!("Chained result: {:?}", chained);
-    
+        
     // ---------------------
     // 3.12 CUSTOM TYPES
     // ---------------------
-    println!("\n// CUSTOM TYPES:");
     
     // Struct - named fields
-    #[derive(Debug)]
     struct Person {
         name: String,
         age: u32,
@@ -693,9 +691,185 @@ in Rust";
     
     println!("Person - name: {}, age: {}, active: {}", 
              person.name, person.age, person.active);
-    println!("Person debug output: {:?}", person);
     
-    // Creating a new instance with struct update syntax
-    let person2 = Person {
-        name: String::from("Bob"),
-        ..person // Use the rest
+    // Tuple struct - unnamed fields
+    struct Color(i32, i32, i32);
+    struct Point(i32, i32, i32);
+    
+    let black = Color(0, 0, 0);
+    let origin = Point(0, 0, 0);
+    
+    println!("Color: ({}, {}, {})", black.0, black.1, black.2);
+    println!("Point: ({}, {}, {})", origin.0, origin.1, origin.2);
+    
+    // Unit struct - no fields
+    struct UnitStruct;
+    
+    let unit = UnitStruct;
+    println!("Unit struct: {:?}", std::mem::size_of_val(&unit));
+    
+    // Enum - define a type with multiple possible variants
+    enum IpAddrKind {
+        V4,
+        V6,
+    }
+    
+    let four = IpAddrKind::V4;
+    let six = IpAddrKind::V6;
+    
+    // Function taking enum as parameter
+    fn route(ip_kind: IpAddrKind) {
+        match ip_kind {
+            IpAddrKind::V4 => println!("IPv4 route"),
+            IpAddrKind::V6 => println!("IPv6 route"),
+        }
+    }
+    
+    route(four);
+    route(six);
+    
+    // Enum with associated values
+    enum IpAddr {
+        V4(u8, u8, u8, u8),
+        V6(String),
+    }
+    
+    let home = IpAddr::V4(127, 0, 0, 1);
+    let loopback = IpAddr::V6(String::from("::1"));
+    
+    // Pattern matching on enum variants
+    match home {
+        IpAddr::V4(a, b, c, d) => println!("IPv4 address: {}.{}.{}.{}", a, b, c, d),
+        IpAddr::V6(addr) => println!("IPv6 address: {}", addr),
+    }
+    
+    match loopback {
+        IpAddr::V4(a, b, c, d) => println!("IPv4 address: {}.{}.{}.{}", a, b, c, d),
+        IpAddr::V6(addr) => println!("IPv6 address: {}", addr),
+    }
+    
+    // Complex enum with different types for each variant
+    enum Message {
+        Quit,
+        Move { x: i32, y: i32 },
+        Write(String),
+        ChangeColor(Color),
+    }
+    
+    let quit_message = Message::Quit;
+    let move_message = Message::Move { x: 10, y: 5 };
+    let write_message = Message::Write(String::from("Hello"));
+    let color_message = Message::ChangeColor(Color(255, 0, 0));
+    
+    // Using match with complex enum
+    fn process_message(msg: Message) {
+        match msg {
+            Message::Quit => println!("Quit message received"),
+            Message::Move { x, y } => println!("Move to coordinates: ({}, {})", x, y),
+            Message::Write(text) => println!("Text message: {}", text),
+            Message::ChangeColor(Color(r, g, b)) => println!("Change color to: rgb({}, {}, {})", r, g, b),
+        }
+    }
+    
+    process_message(quit_message);
+    process_message(move_message);
+    process_message(write_message);
+    process_message(color_message);
+    
+    // ---------------------
+    // 3.13 TYPE ALIASES
+    // ---------------------
+    
+    // Type aliases create a new name for an existing type
+    type Kilometers = i32;
+    
+    let distance: Kilometers = 5;
+    println!("Distance in kilometers: {}", distance);
+    
+    // Commonly used for complex types to reduce repetition
+    type Thunk = Box<dyn Fn() + Send + 'static>;
+    
+    let f: Thunk = Box::new(|| println!("Hi from a Thunk!"));
+    f(); // Calls the function inside the Thunk
+    
+    // ---------------------
+    // 3.14 NEVER TYPE
+    // ---------------------
+    
+    // The ! type represents computations that never complete
+    fn never_returns() -> ! {
+        // This function never returns
+        panic!("This function never returns!");
+    }
+    
+    // Uncomment to see the effect
+    // never_returns();
+    
+    // A common use is with loop, which can return a never type
+    let never_ending_value = loop {
+        // This would run forever if we didn't break
+        break "We actually returned from the loop!";
+    };
+    
+    println!("Loop returned: {}", never_ending_value);
+    
+    // ---------------------
+    // 3.15 TYPE INFERENCE
+    // ---------------------
+    
+    // Rust can infer types in most cases
+    let inferred_type = 42; // Rust infers i32
+    let inferred_float = 3.14; // Rust infers f64
+    
+    println!("Type inference - integer: {}, float: {}", inferred_type, inferred_float);
+    
+    // Type inference with generics
+    let v1 = vec![1, 2, 3]; // Rust infers Vec<i32>
+    let v2 = vec![1.0, 2.0, 3.0]; // Rust infers Vec<f64>
+    
+    println!("Type inference with generics - v1: {:?}, v2: {:?}", v1, v2);
+    
+    // ---------------------
+    // 3.16 TYPE CASTING
+    // ---------------------
+    
+    let num = 65;
+    let character = num as u8 as char; // Convert to ASCII character
+    let float_to_int = 3.99 as i32; // Truncates to 3
+    
+    println!("Type casting - num to char: {}, float to int: {}", character, float_to_int);
+    
+    // Converting between numeric types
+    let large_number: i64 = 9000;
+    let smaller_number = large_number as i32;
+    
+    println!("Type conversion - i64 to i32: {}", smaller_number);
+    
+    // Casting with potentially lossy conversions
+    let large_value: i32 = 1000;
+    let byte_value = large_value as u8; // This will truncate to 232 (1000 % 256)
+    
+    println!("Lossy conversion - i32 to u8: {}", byte_value);
+    
+    // The From and Into traits for type conversions
+    let s = String::from("hello"); // From trait
+    let s2: String = "world".into(); // Into trait
+    
+    println!("From/Into conversions: {}, {}", s, s2);
+    
+    // TryFrom and TryInto for fallible conversions (returns Result)
+    use std::convert::TryFrom;
+    
+    let try_result = i32::try_from(42_i8);
+    println!("TryFrom successful: {:?}", try_result);
+    
+    let try_result_err = i32::try_from(300_i8); // Will fail, i8 max is 127
+    println!("TryFrom unsuccessful: {:?}", try_result_err);
+    
+    // ==========================================
+    // CONCLUSION
+    // ==========================================
+    
+    println!("\nYou've completed Day 1 of Rust programming!");
+    println!("You've learned about printing, variables, data types, and custom types in Rust.");
+}
